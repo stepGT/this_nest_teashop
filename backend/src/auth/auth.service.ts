@@ -8,13 +8,19 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { AuthDTO } from './dto/auth.dto';
+import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
+	EXPIRE_DAY_REFRESH_TOKEN = 1;
+	REFRESH_TOKEN = 'refreshToken';
+
 	constructor(
 		private jwt: JwtService,
 		private userService: UserService,
-		private prisma: PrismaService
+		private prisma: PrismaService,
+		private configService: ConfigService
 	) {}
 
 	async login(dto: AuthDTO) {
@@ -58,5 +64,37 @@ export class AuthService {
 			throw new NotFoundException('User not found!');
 		}
 		return user;
+	}
+
+	/**
+	 *
+	 * @param res
+	 * @param refreshToken
+	 */
+	addRefreshTokenToResponse(res: Response, refreshToken: string) {
+		const expiresIn = new Date();
+		expiresIn.setDate(expiresIn.getDate() + this.EXPIRE_DAY_REFRESH_TOKEN);
+
+		res.cookie(this.REFRESH_TOKEN, refreshToken, {
+			httpOnly: true,
+			domain: this.configService.get('SERVER_DOMAIN'),
+			expires: expiresIn,
+			secure: true,
+			sameSite: 'none'
+		});
+	}
+
+	/**
+	 *
+	 * @param res
+	 */
+	removeRefreshTokenFromResponse(res: Response) {
+		res.cookie(this.REFRESH_TOKEN, '', {
+			httpOnly: true,
+			domain: this.configService.get('SERVER_DOMAIN'),
+			expires: new Date(0),
+			secure: true,
+			sameSite: 'none'
+		});
 	}
 }
