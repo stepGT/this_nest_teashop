@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
 import { AuthDTO } from '../auth/dto/auth.dto'
 import { hash } from 'argon2'
@@ -16,6 +16,7 @@ export class UserService {
 				orders: true
 			}
 		})
+		if (!user) throw new NotFoundException('User not found!');
 		return user
 	}
 
