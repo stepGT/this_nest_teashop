@@ -3,11 +3,13 @@ import {
 	Controller,
 	HttpCode,
 	Post,
+	Res,
 	UsePipes,
 	ValidationPipe
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDTO } from './dto/auth.dto';
+import express from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -16,14 +18,24 @@ export class AuthController {
 	@UsePipes(new ValidationPipe())
 	@HttpCode(200)
 	@Post('login')
-	async login(@Body() dto: AuthDTO) {
-		return this.authService.login(dto);
+	async login(
+		@Body() dto: AuthDTO,
+		@Res({ passthrough: true }) res: express.Response
+	) {
+		const { refreshToken, ...response } = await this.authService.login(dto);
+		this.authService.addRefreshTokenToResponse(res, refreshToken);
+		return response;
 	}
 
 	@UsePipes(new ValidationPipe())
 	@HttpCode(200)
 	@Post('register')
-	async register(@Body() dto: AuthDTO) {
-		return this.authService.register(dto);
+	async register(
+		@Body() dto: AuthDTO,
+		@Res({ passthrough: true }) res: express.Response
+	) {
+		const { refreshToken, ...response } = await this.authService.register(dto);
+		this.authService.addRefreshTokenToResponse(res, refreshToken);
+		return response;
 	}
 }
