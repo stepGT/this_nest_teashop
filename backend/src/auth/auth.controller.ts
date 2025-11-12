@@ -63,4 +63,11 @@ export class AuthController {
 		this.authService.addRefreshTokenToResponse(res, refreshToken);
 		return response;
 	}
+
+	@HttpCode(200)
+	@Post('logout')
+	async logout(@Res({ passthrough: true }) res: express.Response) {
+		this.authService.removeRefreshTokenFromResponse(res);
+		return true;
+	}
 }
