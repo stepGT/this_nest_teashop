@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDTO } from './dto/auth.dto';
-import express from 'express';
+import type { Response, Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -22,7 +22,7 @@ export class AuthController {
 	@Post('login')
 	async login(
 		@Body() dto: AuthDTO,
-		@Res({ passthrough: true }) res: express.Response
+		@Res({ passthrough: true }) res: Response
 	) {
 		const { refreshToken, ...response } = await this.authService.login(dto);
 		this.authService.addRefreshTokenToResponse(res, refreshToken);
@@ -34,7 +34,7 @@ export class AuthController {
 	@Post('register')
 	async register(
 		@Body() dto: AuthDTO,
-		@Res({ passthrough: true }) res: express.Response
+		@Res({ passthrough: true }) res: Response
 	) {
 		const { refreshToken, ...response } =
 			await this.authService.register(dto);
@@ -46,8 +46,8 @@ export class AuthController {
 	@HttpCode(200)
 	@Post('login/access-token')
 	async getNewTokens(
-		@Req() req: express.Request,
-		@Res({ passthrough: true }) res: express.Response
+		@Req() req: Request,
+		@Res({ passthrough: true }) res: Response
 	) {
 		const refreshTokenFromCookie =
 			req.cookies[this.authService.REFRESH_TOKEN];
@@ -66,7 +66,7 @@ export class AuthController {
 
 	@HttpCode(200)
 	@Post('logout')
-	async logout(@Res({ passthrough: true }) res: express.Response) {
+	async logout(@Res({ passthrough: true }) res: Response) {
 		this.authService.removeRefreshTokenFromResponse(res);
 		return true;
 	}
