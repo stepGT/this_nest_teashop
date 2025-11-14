@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { PrismaService } from '../prisma.service'
-import { AuthDTO } from '../auth/dto/auth.dto'
-import { hash } from 'argon2'
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma.service';
+import { AuthDTO } from '../auth/dto/auth.dto';
+import { hash } from 'argon2';
 
 @Injectable()
 export class UserService {
@@ -15,9 +15,9 @@ export class UserService {
 				favorites: true,
 				orders: true
 			}
-		})
+		});
 		if (!user) throw new NotFoundException('User not found!');
-		return user
+		return user;
 	}
 
 	async getByEmail(email: string) {
@@ -28,8 +28,28 @@ export class UserService {
 				favorites: true,
 				orders: true
 			}
-		})
-		return user
+		});
+		return user;
+	}
+
+	async toglleFavorite(productID: string, userID: string) {
+		const user = await this.getByID(userID);
+		const isExist = user.favorites.some(
+			product => product.id === productID
+		);
+		await this.prisma.user.update({
+			where: {
+				id: user.id
+			},
+			data: {
+				favorites: {
+					[isExist ? 'disconnect' : 'connect']: {
+						id: productID
+					}
+				}
+			}
+		});
+		return true;
 	}
 
 	async create(dto: AuthDTO) {
@@ -39,6 +59,6 @@ export class UserService {
 				email: dto.email,
 				password: await hash(dto.password)
 			}
-		})
+		});
 	}
 }
