@@ -32,7 +32,7 @@ export class UserService {
 		return user;
 	}
 
-	async toglleFavorite(productID: string, userID: string) {
+	async togglleFavorite(productID: string, userID: string) {
 		const user = await this.getByID(userID);
 		const isExist = user.favorites.some(
 			product => product.id === productID
