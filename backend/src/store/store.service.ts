@@ -1,5 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
+import { CreateStoreDTO } from './dto/create-store.dto';
+import { UpdateStoreDTO } from './dto/update-store.dto';
+import { Store } from '../../generated/prisma/index';
 
 @Injectable()
 export class StoreService {
@@ -14,5 +17,37 @@ export class StoreService {
 				'The store was not found or you are not the owner!'
 			);
 		return store;
+	}
+
+	async create(userID: string, DTO: CreateStoreDTO) {
+		return await this.prisma.store.create({
+			data: {
+				title: DTO.title,
+				userID,
+				email: ''
+			}
+		});
+	}
+
+	async update(storeID: string, userID: string, DTO: UpdateStoreDTO) {
+		await this.getByID(userID, storeID);
+		return this.prisma.store.update({
+			where: {
+				id: storeID
+			},
+			data: {
+				title: DTO.title,
+				userID
+			}
+		});
+	}
+
+	async delete(storeID: string, userID: string) {
+		await this.getByID(userID, storeID);
+		return this.prisma.store.delete({
+			where: {
+				id: storeID
+			}
+		});
 	}
 }
